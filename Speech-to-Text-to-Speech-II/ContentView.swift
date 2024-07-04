@@ -16,16 +16,6 @@ import UIKit
 import MobileCoreServices
 
 @Observable class SpeechRecognizer: NSObject, SFSpeechRecognizerDelegate {
-    
-    var date: String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-        let dateString = dateFormatter.string(from: Date())
-        let fileName = "transcription_\(dateString).txt"
-        
-        return fileName
-    }
-    
     private var _transcription: String
 
     override init() {
@@ -89,6 +79,7 @@ import MobileCoreServices
         }
         
         recognitionRequest.shouldReportPartialResults = true
+        recognitionRequest.requiresOnDeviceRecognition = false
         
         let inputNode = audioEngine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
