@@ -68,10 +68,9 @@ import MobileCoreServices
     func startTranscribing() {
         DispatchQueue.main.async {
             self.isTranscribing = true
-            self.transcription = self.date
+            self.recognitionTask?.cancel()
+            self.recognitionTask = nil
         }
-        recognitionTask?.cancel()
-        recognitionTask = nil
         
         let audioSession = AVAudioSession.sharedInstance()
         do {
@@ -355,7 +354,7 @@ struct AudioDocumentPicker: UIViewControllerRepresentable {
     }
     
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.audio])
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.audio], asCopy: true)
         picker.delegate = context.coordinator
         return picker
     }
