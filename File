@@ -1,0 +1,83 @@
+- (NSString *)defaultLogsDirectory
+{
+#if TARGET_OS_IPHONE
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    NSString *baseDir = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
+    NSString *logsDirectory = [baseDir stringByAppendingPathComponent:@"Logs"];
+    
+#else
+    NSString *appName = [[NSProcessInfo processInfo] processName];
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
+    NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : NSTemporaryDirectory();
+    NSString *logsDirectory = [[basePath stringByAppendingPathComponent:@"Logs"] stringByAppendingPathComponent:appName];
+
+#endif
+
+    return logsDirectory;
+}
+
+- (NSString *)logsDirectory
+{
+    // We could do this check once, during initalization, and not bother again.
+    // But this way the code continues to work if the directory gets deleted while the code is running.
+    
+    if (![[NSFileManager defaultManager] fileExistsAtPath:_logsDirectory])
+    {
+        NSError *err = nil;
+        if (![[NSFileManager defaultManager] createDirectoryAtPath:_logsDirectory
+                                       withIntermediateDirectories:YES attributes:nil error:&err])
+        {
+            NSLogError(@"DDFileLogManagerDefault: Error creating logsDirectory: %@", err);
+        }
+    }
+    
+    return _logsDirectory;
+}
+
+/**
+ * Generates a short UUID suitable for use in the log file's name.
+ * The result will have six characters, all in the hexadecimal set [0123456789ABCDEF].
+**/
+- (NSString *)generateShortUUID
+{
+    CFUUIDRef uuid = CFUUIDCreate(NULL);
+    
+    CFStringRef fullStr = CFUUIDCreateString(NULL, uuid);
+    NSString *result = (__bridge_transfer NSString *)CFStringCreateWithSubstring(NULL, fullStr, CFRangeMake(0, 6));
+    
+    CFRelease(fullStr);
+    CFRelease(uuid);
+    
+    return result;
+}
+
+/**
+ * Generates a new unique log file , and creates the corresponding log file.
+**/
+- (NSString *)createNewLogFile
+{
+    // Generate a random log file name, and create the file (if there isn't a collision)
+    
+    NSString *logsDirectory = [self logsDirectory];
+    do
+    {
+        NSString *fileName = [NSString stringWithFormat:@"log-%@.txt", [self generateShortUUID]];
+        
+        NSString *filePath = [logsDirectory stringByAppendingPathComponent:fileName];
+        
+        if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
+        {
+            NSLogVerbose(@"DDLogFileManagerDefault: Creating new log file: %@", fileName);
+            
+            [[NSFileManager defaultManager] createFileAtPath:filePath contents:nil attributes:nil];
+            
+            // Since we just created a new log file, we may need to delete some old log files
+            [self deleteOldLogFiles];
+            
+            return filePath;
+        }
+        
+    } while(YES);
+}
+
+
