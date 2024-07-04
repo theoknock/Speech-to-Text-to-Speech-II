@@ -12,6 +12,7 @@
 		B9343F302C36072A00AFF8B4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9343F2F2C36072A00AFF8B4 /* Assets.xcassets */; };
 		B9343F332C36072A00AFF8B4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9343F322C36072A00AFF8B4 /* Preview Assets.xcassets */; };
 		B9343F762C362C5600AFF8B4 /* File in Resources */ = {isa = PBXBuildFile; fileRef = B9343F752C362C5600AFF8B4 /* File */; };
+		B9EFD9E42C372AFE00596F8D /* Speech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9EFD9E32C372AFD00596F8D /* Speech.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +24,7 @@
 		B9343F392C36114300AFF8B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B9343F3A2C36129600AFF8B4 /* Speech-to-Text-to-Speech-II.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Speech-to-Text-to-Speech-II.entitlements"; sourceTree = "<group>"; };
 		B9343F752C362C5600AFF8B4 /* File */ = {isa = PBXFileReference; lastKnownFileType = text; path = File; sourceTree = "<group>"; };
+		B9EFD9E32C372AFD00596F8D /* Speech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speech.framework; path = System/Library/Frameworks/Speech.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -30,6 +32,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9EFD9E42C372AFE00596F8D /* Speech.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,6 +45,7 @@
 				B9343F752C362C5600AFF8B4 /* File */,
 				B9343F2A2C36072900AFF8B4 /* Speech-to-Text-to-Speech-II */,
 				B9343F292C36072900AFF8B4 /* Products */,
+				B9EFD9E22C372AFD00596F8D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -72,6 +76,14 @@
 				B9343F322C36072A00AFF8B4 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		B9EFD9E22C372AFD00596F8D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B9EFD9E32C372AFD00596F8D /* Speech.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

@@ -27,10 +27,7 @@ import MobileCoreServices
     }
     
     override init() {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-        let dateString = dateFormatter.string(from: Date())
-        _transcription = "transcription_\(dateString).txt"
+        _transcription = "Transcribed speech will appear here..."
     }
     
     var transcription: String {
@@ -49,25 +46,30 @@ import MobileCoreServices
     private var audioEngine = AVAudioEngine()
     private var speechSynthesizer = AVSpeechSynthesizer()
     
-    func startTranscribing() {
-        self.speechRecognizer?.delegate = self
-        SFSpeechRecognizer.requestAuthorization { authStatus in
-            switch authStatus {
-            case .authorized:
-                DispatchQueue.main.async {
-                    self.isTranscribing = true
-                    self.transcription = self.date
-                }
-                self.startRecording()
-            case .denied, .restricted, .notDetermined:
-                print("Speech recognition not authorized")
-            @unknown default:
-                fatalError("Unknown authorization status")
-            }
-        }
-    }
+//    func startTranscribing() {
+//        self.speechRecognizer?.delegate = self
+//        SFSpeechRecognizer.requestAuthorization { authStatus in
+//            switch authStatus {
+//            case .authorized:
+//                DispatchQueue.main.async {
+//                    self.isTranscribing = true
+//                    self.transcription = self.date
+//                }
+//                self.startRecording()
+//            case .denied, .restricted, .notDetermined:
+//                print("Speech recognition not authorized")
+//            @unknown default:
+//                fatalError("Unknown authorization status")
+//            }
+//        }
+//    }
     
-    private func startRecording() {
+//    private func startRecording() {
+    func startTranscribing() {
+        DispatchQueue.main.async {
+            self.isTranscribing = true
+            self.transcription = self.date
+        }
         recognitionTask?.cancel()
         recognitionTask = nil
         
@@ -147,12 +149,12 @@ enum ActiveSheet: Identifiable {
 }
 
 struct ContentView: View {
-    @State private var text: String = "Hello"
+    @State private var text: String = "Type text here..."
     private let synthesizer = AVSpeechSynthesizer()
     @State private var speechRecognizer = SpeechRecognizer()
     @State private var showDocumentPicker = false
     
-    @State private var audioTranscription: String = "Transcription will appear here..."
+    @State private var audioTranscription: String = "Transcribed audio will appear here..."
     @State private var showAudioDocumentPicker: Bool = false
     @State private var audioURL: URL?
     
@@ -164,17 +166,20 @@ struct ContentView: View {
         
         VStack {
             Text(audioTranscription)
+                .frame(maxWidth: UIScreen.main.bounds.size.width)
                 .padding()
+                .border(Color.gray, width: 1)
+                .cornerRadius(5)
             
-            Button("Import Audio File") {
+            Button("Load Transcription") {
                 activeSheet = .audioDocumentPicker
-                //                    showAudioDocumentPicker = true
             }
             .padding()
+            .background(Color.green)
+            .foregroundColor(.white)
+            .cornerRadius(5)
             
-            //            .sheet(isPresented: $showAudioDocumentPicker) {
-            //                AudioDocumentPicker(audioURL: $audioURL, onFilePicked: transcribeAudio)
-            
+            Divider().padding()
             
             TextEditor(text: $text)
                 .padding()
@@ -227,19 +232,39 @@ struct ContentView: View {
             .cornerRadius(5)
         }
         .sheet(item: $activeSheet) { sheet in
-                    switch sheet {
-                    case .documentPicker:
-                        DocumentPicker(fileURL: $fileURL)
-                    case .audioDocumentPicker:
-                        AudioDocumentPicker(audioURL: $audioURL, onFilePicked: transcribeAudio)
-                    }
-                }
+            switch sheet {
+            case .documentPicker:
+                DocumentPicker(fileURL: $fileURL)
+            case .audioDocumentPicker:
+                AudioDocumentPicker(audioURL: $audioURL, onFilePicked: transcribeAudio)
+            }
+        }
         
-//        .sheet(isPresented: $showDocumentPicker) {
-//            DocumentPicker(fileURL: $fileURL)
-//        }
+        //        .sheet(isPresented: $showDocumentPicker) {
+        //            DocumentPicker(fileURL: $fileURL)
+        //        }
+        .onAppear {
+            requestSpeechAuthorization()
+        }
         
         
+    }
+    
+    func requestSpeechAuthorization() {
+        SFSpeechRecognizer.requestAuthorization { authStatus in
+            switch authStatus {
+            case .authorized:
+                print("Speech recognition authorized")
+            case .denied:
+                print("Speech recognition authorization denied")
+            case .restricted:
+                print("Speech recognition restricted on this device")
+            case .notDetermined:
+                print("Speech recognition not determined")
+            @unknown default:
+                print("Speech recognition authorization unknown")
+            }
+        }
     }
     
     func speakText() {
@@ -277,7 +302,7 @@ struct ContentView: View {
             try text.write(to: fileURL, atomically: true, encoding: .utf8)
             self.fileURL = fileURL
             activeSheet = .documentPicker
-//            showDocumentPicker = true
+            //            showDocumentPicker = true
             print("File saved successfully, presenting document picker.")
         } catch {
             print("Error writing to file: \(error)")
