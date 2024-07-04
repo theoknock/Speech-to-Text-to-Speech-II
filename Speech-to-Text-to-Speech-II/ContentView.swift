@@ -17,6 +17,14 @@ import MobileCoreServices
 
 @Observable class SpeechRecognizer: NSObject, SFSpeechRecognizerDelegate {
     private var _transcription: String
+   
+    var date: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let dateString = dateFormatter.string(from: Date())
+        
+        return dateString
+    }
 
     override init() {
             let dateFormatter = DateFormatter()
@@ -48,6 +56,7 @@ import MobileCoreServices
             case .authorized:
                 DispatchQueue.main.async {
                     self.isTranscribing = true
+                    self.transcription = self.date
                 }
                 self.startRecording()
             case .denied, .restricted, .notDetermined:
