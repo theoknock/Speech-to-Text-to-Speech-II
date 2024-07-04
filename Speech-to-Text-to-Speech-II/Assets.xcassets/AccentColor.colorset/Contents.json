@@ -1,7 +1,18 @@
 {
   "colors" : [
     {
+      "color" : {
+        "platform" : "ios",
+        "reference" : "linkColor"
+      },
       "idiom" : "universal"
+    },
+    {
+      "color" : {
+        "platform" : "ios",
+        "reference" : "linkColor"
+      },
+      "idiom" : "iphone"
     }
   ],
   "info" : {
