@@ -17,7 +17,32 @@ import MobileCoreServices
 
 @Observable class SpeechRecognizer: NSObject, SFSpeechRecognizerDelegate {
     
-    var transcription: String = "Transcription"
+    var date: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let dateString = dateFormatter.string(from: Date())
+        let fileName = "transcription_\(dateString).txt"
+        
+        return fileName
+    }
+    
+    private var _transcription: String
+
+    override init() {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+            let dateString = dateFormatter.string(from: Date())
+            _transcription = "transcription_\(dateString).txt"
+        }
+
+        var transcription: String {
+            get {
+                return _transcription
+            }
+            set(newValue) {
+                _transcription = newValue
+            }
+        }
     var isTranscribing: Bool = false
     
     private var speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
@@ -119,6 +144,7 @@ struct ContentView: View {
     @State private var speechRecognizer = SpeechRecognizer()
     @State private var showDocumentPicker = false
     
+    
     var body: some View {
         VStack {
             TextEditor(text: $text)
@@ -186,9 +212,13 @@ struct ContentView: View {
     @State private var fileURL: URL?
     
     func saveTextToFile(text: String) {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let dateString = dateFormatter.string(from: Date())
+        let fileName = "transcription_\(dateString).txt"
         // Create a temporary file URL
         let tempDirectory = FileManager.default.temporaryDirectory
-        let fileURL = tempDirectory.appendingPathComponent("sample.txt")
+        let fileURL = tempDirectory.appendingPathComponent(fileName)
         
         do {
             // Write the string to the file
