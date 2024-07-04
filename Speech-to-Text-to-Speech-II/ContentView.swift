@@ -17,7 +17,7 @@ import MobileCoreServices
 
 @Observable class SpeechRecognizer: NSObject, SFSpeechRecognizerDelegate {
     private var _transcription: String
-   
+    
     var date: String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
@@ -25,22 +25,22 @@ import MobileCoreServices
         
         return dateString
     }
-
+    
     override init() {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-            let dateString = dateFormatter.string(from: Date())
-            _transcription = "transcription_\(dateString).txt"
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let dateString = dateFormatter.string(from: Date())
+        _transcription = "transcription_\(dateString).txt"
+    }
+    
+    var transcription: String {
+        get {
+            return _transcription
         }
-
-        var transcription: String {
-            get {
-                return _transcription
-            }
-            set(newValue) {
-                _transcription = newValue
-            }
+        set(newValue) {
+            _transcription = newValue
         }
+    }
     var isTranscribing: Bool = false
     
     private var speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
@@ -138,15 +138,44 @@ import MobileCoreServices
     }
 }
 
+enum ActiveSheet: Identifiable {
+    case documentPicker, audioDocumentPicker
+    
+    var id: Int {
+        hashValue
+    }
+}
+
 struct ContentView: View {
     @State private var text: String = "Hello"
     private let synthesizer = AVSpeechSynthesizer()
     @State private var speechRecognizer = SpeechRecognizer()
     @State private var showDocumentPicker = false
     
+    @State private var audioTranscription: String = "Transcription will appear here..."
+    @State private var showAudioDocumentPicker: Bool = false
+    @State private var audioURL: URL?
+    
+    @State private var activeSheet: ActiveSheet?
+    
+    
     
     var body: some View {
+        
         VStack {
+            Text(audioTranscription)
+                .padding()
+            
+            Button("Import Audio File") {
+                activeSheet = .audioDocumentPicker
+                //                    showAudioDocumentPicker = true
+            }
+            .padding()
+            
+            //            .sheet(isPresented: $showAudioDocumentPicker) {
+            //                AudioDocumentPicker(audioURL: $audioURL, onFilePicked: transcribeAudio)
+            
+            
             TextEditor(text: $text)
                 .padding()
                 .border(Color.gray, width: 1)
@@ -189,7 +218,7 @@ struct ContentView: View {
             Divider().padding()
             
             Button("Save Transcription") {
-//                speechRecognizer.saveTranscriptionToFile()
+                //                speechRecognizer.saveTranscriptionToFile()
                 saveTextToFile(text: speechRecognizer.transcription)
             }
             .padding()
@@ -197,9 +226,19 @@ struct ContentView: View {
             .foregroundColor(.white)
             .cornerRadius(5)
         }
-        .sheet(isPresented: $showDocumentPicker) {
-            DocumentPicker(fileURL: $fileURL)
-        }
+        .sheet(item: $activeSheet) { sheet in
+                    switch sheet {
+                    case .documentPicker:
+                        DocumentPicker(fileURL: $fileURL)
+                    case .audioDocumentPicker:
+                        AudioDocumentPicker(audioURL: $audioURL, onFilePicked: transcribeAudio)
+                    }
+                }
+        
+//        .sheet(isPresented: $showDocumentPicker) {
+//            DocumentPicker(fileURL: $fileURL)
+//        }
+        
         
     }
     
@@ -207,6 +246,19 @@ struct ContentView: View {
         let utterance = AVSpeechUtterance(string: $text.wrappedValue)
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         synthesizer.speak(utterance)
+    }
+    
+    func transcribeAudio(url: URL) {
+        let recognizer = SFSpeechRecognizer()
+        let request = SFSpeechURLRecognitionRequest(url: url)
+        
+        recognizer?.recognitionTask(with: request) { result, error in
+            if let result = result {
+                self.audioTranscription = result.bestTranscription.formattedString
+            } else if let error = error {
+                self.audioTranscription = "Error: \(error.localizedDescription)"
+            }
+        }
     }
     
     @State private var fileURL: URL?
@@ -224,7 +276,8 @@ struct ContentView: View {
             // Write the string to the file
             try text.write(to: fileURL, atomically: true, encoding: .utf8)
             self.fileURL = fileURL
-            showDocumentPicker = true
+            activeSheet = .documentPicker
+//            showDocumentPicker = true
             print("File saved successfully, presenting document picker.")
         } catch {
             print("Error writing to file: \(error)")
@@ -265,6 +318,41 @@ struct DocumentPicker: UIViewControllerRepresentable {
         func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
             print("Document picker was cancelled")
         }
+    }
+}
+
+struct AudioDocumentPicker: UIViewControllerRepresentable {
+    @Binding var audioURL: URL?
+    var onFilePicked: (URL) -> Void
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(audioURL: $audioURL, onFilePicked: onFilePicked)
+    }
+    
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.audio])
+        picker.delegate = context.coordinator
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+    
+    class Coordinator: NSObject, UIDocumentPickerDelegate {
+        @Binding var audioURL: URL?
+        var onFilePicked: (URL) -> Void
+        
+        init(audioURL: Binding<URL?>, onFilePicked: @escaping (URL) -> Void) {
+            self._audioURL = audioURL
+            self.onFilePicked = onFilePicked
+        }
+        
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            guard let url = urls.first else { return }
+            self.audioURL = url
+            onFilePicked(url)
+        }
+        
+        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {}
     }
 }
 

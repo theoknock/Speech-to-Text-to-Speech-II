@@ -17,7 +17,7 @@
 /* Begin PBXFileReference section */
 		B9343F282C36072900AFF8B4 /* Speech-to-Text-to-Speech-II.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Speech-to-Text-to-Speech-II.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9343F2B2C36072900AFF8B4 /* Speech_to_Text_to_Speech_IIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speech_to_Text_to_Speech_IIApp.swift; sourceTree = "<group>"; };
-		B9343F2D2C36072900AFF8B4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B9343F2D2C36072900AFF8B4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		B9343F2F2C36072A00AFF8B4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B9343F322C36072A00AFF8B4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B9343F392C36114300AFF8B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
